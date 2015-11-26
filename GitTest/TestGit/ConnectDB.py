@@ -9,9 +9,9 @@ def ConnectDB(amazon=True):
 		driver = "DRIVER=/usr/local/lib/psqlodbcw.so;"
 
 	if (amazon):
-	    server="SERVER=testdb.c3rdj3prlvky.us-east-1.rds.amazonaws.com;"
-	    database="DATABASE=testGFC;"
-	    userPass="UID=testuser;PWD=testuser;"
+		    server="SERVER=testdb.c3rdj3prlvky.us-east-1.rds.amazonaws.com;"
+		    database="DATABASE=testGFC;"
+		    userPass="UID=testuser;PWD=testuser;"
 	else:
 	    server="SERVER=localhost;"
 	    database="DATABASE=GFC;"
