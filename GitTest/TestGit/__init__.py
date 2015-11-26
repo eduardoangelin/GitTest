@@ -11,7 +11,8 @@ if __name__ == "__main__":
 	amazon = True
 	connection = ConnectDB()
 	reportTest = ReportTest(connection)
-	reportTest.BalanceteReport()
+	bla = reportTest.BalanceteReport()
+	reportTest.ReportLayout()
 	app = QtWidgets.QApplication(sys.argv)
 	MainWindow = QtWidgets.QMainWindow()
 	ui = Ui_MainWindow(connection)
