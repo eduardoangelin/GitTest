@@ -5,14 +5,14 @@ from GFC.Database.Credencias import Credenciais
 
 class Database (object):
 
-	def __init__(self, server="Amazon", db = "MSSQL"):
+	def __init__(self, server="Amazon", instance = "MSSQL"):
 		self.connection = None
 		self.server = server
-		self.db = db
+		self.instance = instance
 		
 		
 	def ConnectDB(self):
-		credenciais = Credenciais(self.server, self.db)
+		credenciais = Credenciais(self.server, self.instance)
 		print("Conectando Banco de Dados")
 		self.connection = pyodbc.connect(credenciais.getDriver()+credenciais.getServer()+credenciais.getDatabase()+credenciais.getUserPass())
 		print("Banco de Dados conectado com Sucesso!")
@@ -23,5 +23,12 @@ class Database (object):
 		sql = "select {} from {}".format(columns, view)
 		df = psql.read_sql(sql, self.connection)
 		return df
+	
+	
+	def ConsultaClientesPorNome(self, name):
+		sql = "select id, RAZAOSOCIAL, CIDADE, UF from clientefornecedor where RAZAOSOCIAL LIKE '%{}%'".format(name)
+		df = psql.read_sql(sql, self.connection)
+		tuples = [tuple(x) for x in df.values]
+		return tuples
 		
 		
