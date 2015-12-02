@@ -3,7 +3,7 @@ import sys
 import os
 from GFC.FrontEnd.TelaGrid import Ui_MainWindow
 from GFC.Report.ReportTest import ReportTest
-from GFC.Database.ConnectDB import ConnectDB
+from GFC.Database.Database import ConnectDB
 from PyQt5 import QtWidgets
 #from PyQt5 import QtCore, QtGui, QtWidgets
 from io import BytesIO

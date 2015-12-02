@@ -1,6 +1,6 @@
 # coding=utf-8
 import sys
-from GFC.Database.ConnectDB import *
+from GFC.Database.Database import *
 from GFC.Report.ReportTest import *
 
 if __name__ == "__main__":

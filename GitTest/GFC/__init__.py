@@ -1,6 +1,6 @@
 # coding=utf-8
 import sys
-from GFC.Database.ConnectDB import *
+from GFC.Database.Database import *
 from GFC.Report.ReportTest import *
 
 if __name__ == "__main__":
@@ -8,9 +8,10 @@ if __name__ == "__main__":
         amazon = True
         #f = say_hello()
         print ('Inicio')
-        connection = ConnectDB()
+        db = Database()
+        connection = db.ConnectDB()
         print ('Conectado')
-        reportTest = ReportTest(connection)
+        reportTest = ReportTest(db.connection)
         reportTest.ReportHTML("fn_BalanceteConsolidadoContabil", ["'2015-01-31'", "'2015-01-01'"])
         print ('Gerando Relatorio')
         sys.exit(0)
