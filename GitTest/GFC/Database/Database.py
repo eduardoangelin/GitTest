@@ -1,14 +1,21 @@
-# coding=utf-8
+# -*- coding: UTF-8 -*-
 import pyodbc
 import pandas.io.sql as psql
 from GFC.Database.Credencias import Credenciais
 
 class Database (object):
 
-	def __init__(self, server="Amazon", instance = "MSSQL"):
+	def __init__(self, server="NotAmazon", instance = "MSSQL"):
 		self.connection = None
 		self.server = server
 		self.instance = instance
+		self.dictView_InsertProcedureDatabase = {}
+		self.dictView_InsertProcedureDatabase['CAIXA'] = 'EXECUTE [dbo].[SP_INSERTCAIXA] @ID, @SUF_COD_CTA, @CTA, @DT_SALDO, @SALDO, @COMANDO'
+		self.dictView_InsertProcedureDatabase['BANCO'] = 'EXECUTE [dbo].[SP_INSERTBANCO] @ID, @SUF_COD_CTA, @CTA, @DT_SALDO, @SALDO, @COMANDO'
+		self.dictView_InsertProcedureDatabase[u'APLICAÇÃO'] = 'EXECUTE [dbo].[SP_INSERTAPLICACAO] @ID, @SUF_COD_CTA, @CTA, @DT_SALDO, @SALDO, @COMANDO'
+		self.dictView_InsertProcedureDatabase['ADIANTAMENTO'] = 'EXECUTE [dbo].[SP_INSERTADIANTAMENTO] @ID, @SUF_COD_CTA, @CTA, @DT_SALDO, @SALDO, @COMANDO'
+		
+		self.dictView_Table = {'CAIXABANCO':'VW_CAIXABANCO','CAIXA':'VW_CAIXABANCO','BANCO':'VW_CAIXABANCO',u'APLICAÇÃO':'VW_CAIXABANCO','ADIANTAMENTO':'VW_CAIXABANCO'}
 		
 		
 	def ConnectDB(self):
@@ -18,10 +25,34 @@ class Database (object):
 		print("Banco de Dados conectado com Sucesso!")
 		return self.connection
 	
-	def GetColumnFromView(self, columnsList, view):
-		columns = ','.join(columnsList)
-		sql = "select {} from {}".format(columns, view)
+	def GetColumnFromView(self, columnsList, view, IDClause = None):
+		if(columnsList == ["*"]):
+			columns = "*"
+		else:	
+			columns = ','.join(columnsList)
+		sql = "select {} from {}".format(columns, self.dictView_Table[view.upper()])
+		if (IDClause != None):
+			sql = sql + " where ID = {}".format(IDClause)
 		df = psql.read_sql(sql, self.connection)
+		df.rename(columns=lambda x: x.upper(), inplace=True)
+		return df
+	
+	def QueryView(self, columnsList, view, whereDict = None):
+		if(columnsList == ["*"] or columnsList is None):
+			columns = "*"
+		else:	
+			columns = ','.join(columnsList)
+		sql = "select {} from {}".format(columns, self.dictView_Table[view.upper()])
+		if (whereDict != None):
+			vFirst = True
+			for vKey in whereDict.keys():
+				if (vFirst):
+					sql = sql + " where {} = {}".format(vKey, whereDict[vKey])
+					vFirst = False
+				else:
+					sql = sql + " AND {} = {}".format(vKey, whereDict[vKey])
+		df = psql.read_sql(sql, self.connection)
+		df.rename(columns=lambda x: x.upper(), inplace=True)
 		return df
 	
 	def InsertFornecedor(self, vDictInputsDatabase):
@@ -33,11 +64,42 @@ class Database (object):
 		cursor.execute(command)
 		cursor.commit()
 	
+	def InsertView(self, view, vDictInputsDatabase):
+		cursor = self.connection.cursor()
+		command = self.dictView_InsertProcedureDatabase[view.upper()]
+		for i in vDictInputsDatabase.keys():
+			command = command.replace(i, vDictInputsDatabase[i])
+		cursor.execute(command)	
+		cursor.commit()
+		
+	def DeleteView(self, view, vID):
+		cursor = self.connection.cursor()
+		command = self.dictView_InsertProcedureDatabase[view.upper()]
+		vParam = command.replace(command[:command.find("@")], "").replace(" ", "").split(",")
+		for i in vParam:
+			if (i == '@ID'):
+				command = command.replace(i, str(vID))
+			elif (i == '@COMANDO'):
+				command = command.replace(i, "'D'")
+			else:
+				command = command.replace(i, "NULL")
+		cursor.execute(command)	
+		cursor.commit()
 	
 	def ConsultaClientesPorNome(self, name):
 		sql = "select id, RAZAOSOCIAL, CIDADE, UF from clientefornecedor where RAZAOSOCIAL LIKE '%{}%'".format(name)
 		df = psql.read_sql(sql, self.connection)
 		tuples = [tuple(x) for x in df.values]
 		return tuples
-		
+
+
+if __name__ == '__main__':
+	db = Database()
+	db.ConnectDB()
+	df = db.GetColumnFromView(["*"], "CAIXABANCO")
+	print (df)
+	for i in df:
+		print (i)
+	
+	
 		

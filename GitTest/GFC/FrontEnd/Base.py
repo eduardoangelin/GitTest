@@ -8,7 +8,10 @@ Created on 2 de dez de 2015
 
 #from PyQt5 import QtCore, QtGui, QtWidgets
 import pyodbc
-from PyQt5.QtWidgets import QLabel, QComboBox, QLineEdit, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QWidget, QDialog, QTableWidget, QMessageBox, QAbstractItemView 
+import time
+from PyQt5.QtWidgets import QLabel, QComboBox, QLineEdit, QCheckBox, QPushButton, QVBoxLayout, QHBoxLayout, QFormLayout, QWidget, QDialog, QTableWidget, QMessageBox, QAbstractItemView ,\
+    QDateEdit
+from PyQt5.QtCore import QDate
 
 
 class TextBox(QLineEdit):
@@ -21,25 +24,54 @@ class TextBox(QLineEdit):
             self.setMaxLength(MaxLength)  
         if(Validator is not None):
             self.setValidator(Validator)
+        self.clear()
+    
+class DateBox(QDateEdit):
+    
+    def __init__(self, parent = None, FixedWidth = 170, MaxLength = None, Validator = None, DefaultDate = None):
+        super(DateBox, self).__init__(parent)
+        if(FixedWidth is not None):
+            self.setFixedWidth(FixedWidth)  
+        if(MaxLength is not None):
+            self.setMaxLength(MaxLength)  
+        if(Validator is not None):
+            self.setValidator(Validator)
+        if(DefaultDate is None):
+            DefaultDate = time.strftime("%Y-%m-%d")
+        self.setText(DefaultDate)
+    
+    def setText(self, text):
+        [year, month, day] = text.split('-')
+        self.setDate(QDate(int(year), int(month), int(day)))
+    
+    def text(self, *args, **kwargs):
+        vDate = QDateEdit.text(self, *args, **kwargs)
+        [day, month, year] = vDate.split('/')
+        vDate = "{}-{}-{}".format(year, month, day)
+        return vDate
+    
         
 class ComboBox(QComboBox):
     
     def __init__(self, parent = None, FixedWidth = 170):
         super(ComboBox, self).__init__(parent)
         self.setFixedWidth(FixedWidth)
-    
+        
     def text(self):
         return str(self.currentText())
     
+    def setText(self, text):
+        index = self.findData(text)
+        self.setCurrentIndex(index)
+    
     def setUFForm(self):
         self.addItems(["AC", "PE", "SP", "BA"])
-        #for i in self.listUFs:
-        #    self.addItem(i)
     
     def setPessoaForm(self):
         self.addItems(["PJ", "PF"])
-        #for i in self.listUFs:
-        #    self.addItem(i)
+    
+    def setPersonalForm(self, vListValues):
+        self.addItems(vListValues)
         
 class Label(QLabel):
     
